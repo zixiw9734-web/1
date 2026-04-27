@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化工原理 - 第一章：流体流动</title>
+    <style>
+        :root {
+            --apple-blue: #0071e3;
+            --apple-dark: #1d1d1f;
+            --apple-gray: #86868b;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            background: linear-gradient(-45deg, #a18cd1, #fbc2eb, #8ec5fc, #e0c3fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--apple-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .app-container {
+            max-width: 1300px; margin: 40px auto;
+            display: grid; grid-template-columns: 280px 1fr; gap: 30px; padding: 0 20px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px 20px;
+            box-shadow: var(--glass-shadow); position: sticky; top: 40px; height: calc(100vh - 140px);
+            display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+        }
+
+        .sidebar h2 { font-size: 1.3rem; margin-top: 0; margin-bottom: 15px; padding-left: 10px; font-weight: 600; }
+
+        .nav-btn {
+            background: transparent; border: none; text-align: left; padding: 12px 15px;
+            border-radius: 12px; font-size: 0.95rem; color: var(--apple-gray); cursor: pointer;
+            transition: all 0.3s ease; font-weight: 500;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.5); color: var(--apple-dark); }
+        .nav-btn.active {
+            background: rgba(255,255,255,0.9); color: var(--apple-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-weight: 600;
+        }
+
+        /* 右侧内容区 */
+        .content-area {
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px 50px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 2.2rem; margin-top: 0; margin-bottom: 10px; }
+        h3 { color: var(--apple-blue); font-size: 1.3rem; margin-top: 30px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;}
+        p { font-size: 1.05rem; margin-bottom: 15px; color: #333; }
+
+        .formula-box {
+            background: rgba(255, 255, 255, 0.85); border-left: 4px solid var(--apple-blue);
+            padding: 15px 20px; border-radius: 0 12px 12px 0; font-family: "Courier New", Courier, monospace;
+            margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .formula { font-size: 1.3rem; font-weight: bold; color: #d93025; text-align: center; margin-bottom: 10px; }
+        .formula-desc { font-family: sans-serif; font-size: 0.95rem; color: var(--apple-gray); margin: 0; }
+
+        .highlight { background: rgba(0, 113, 227, 0.1); color: var(--apple-blue); padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        
+        .alert-box {
+            background: rgba(255, 149, 0, 0.1); border-left: 4px solid #ff9500;
+            padding: 15px; border-radius: 0 8px 8px 0; margin: 15px 0; font-size: 0.95rem; color: #333;
+        }
+
+        /* 例题卡片样式 */
+        .example-card {
+            background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 113, 227, 0.2);
+            border-radius: 16px; padding: 25px; margin-bottom: 25px;
+        }
+        .example-title {
+            font-weight: bold; font-size: 1.1rem; color: var(--apple-dark);
+            margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .badge { background: var(--apple-blue); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; }
+        .example-problem { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 0.95rem; }
+
+        /* 折叠面板 */
+        .accordion-btn {
+            background-color: transparent; color: var(--apple-blue); cursor: pointer; padding: 10px 0;
+            width: 100%; text-align: left; border: none; outline: none; font-size: 1.05rem;
+            font-weight: bold; display: flex; align-items: center;
+        }
+        .accordion-btn::before { content: '👉'; margin-right: 10px; font-size: 1.2rem; transition: transform 0.3s; }
+        .accordion-btn.active::before { transform: rotate(90deg); }
+        .accordion-content {
+            padding: 0 15px; background-color: transparent; max-height: 0; overflow: hidden;
+            transition: max-height 0.4s ease-out; border-left: 2px solid rgba(0, 113, 227, 0.3); margin-left: 10px;
+        }
+        .step { margin: 15px 0; font-size: 0.95rem; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="sidebar">
+            <h2>第一章：流体流动</h2>
+            <button class="nav-btn active" onclick="showTab('sec1')">1. 流体静力学基本方程</button>
+            <button class="nav-btn" onclick="showTab('sec2')">2. 质量衡算与连续性方程</button>
+            <button class="nav-btn" onclick="showTab('sec3')">3. 机械能衡算 (伯努利方程)</button>
+            <button class="nav-btn" onclick="showTab('sec4')">4. 雷诺数与流动形态</button>
+            <button class="nav-btn" onclick="showTab('sec5')">5. 流动阻力与直管阻力</button>
+            <button class="nav-btn" onclick="showTab('sec6')">6. 局部阻力与当量长度</button>
+            <button class="nav-btn" onclick="showTab('sec7')">7. 流量计原理与测定</button>
+            <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 5px 0;">
+            <button class="nav-btn" onclick="showTab('examples')">📚 经典例题</button>
+        </div>
+
+        <div class="content-area">
+
+            <div id="sec1" class="section active">
+                <h1>第一节：流体静止的基本方程</h1>
+                <p>静止流体内部任一点的压力称为该点的静压力。其特点是：各方向作用力相等；垂直于作用面；在重力场中，同一水平面上各点静压力相等。</p>
+                
+                <h3>1. 流体静力学基本方程</h3>
+                <p>对于重力场中静止的、连续的不可压缩流体（液体），其内部压力随高度的变化规律为：</p>
+                <div class="formula-box">
+                    <div class="formula">p₂ = p₁ + ρg(z₁ - z₂)</div>
+                    <p class="formula-desc">其中：p为压力(Pa)，ρ为流体密度(kg/m³)，z为高度(m)。上式表明，所在高度越低(z越小)，压力p越大。</p>
+                </div>
+                <p>若容器上部与大气相通，以表压计 $p_1 = 0$，则深度为 $h$ 处的压力可表示为 $p = \rho g h$。</p>
+
+                <h3>2. 静力学方程的应用：U形管压差计</h3>
+                <p>根据你的笔记重点，U形管是考研和期末必考点。核心思想是寻找<span class="highlight">等压面</span>。</p>
+                <div class="formula-box">
+                    <div class="formula">p₁ - p₂ = (ρ_指示液 - ρ_被测) * g * R</div>
+                    <p class="formula-desc">R 为 U 形管内指示液的液面高度差。若被测流体是气体，由于 ρ_被测 远小于 ρ_指示液，公式可简化为 $p_1 - p_2 \approx R \cdot g \cdot \rho_0$。</p>
+                </div>
+            </div>
+
+            <div id="sec2" class="section">
+                <h1>第二节：质量衡算与连续性方程</h1>
+                <p>设流体在管道中作连续稳定流动，管道内任意处都没有流体积聚。根据质量守恒定律，流入的质量必然等于流出的质量。</p>
+
+                <h3>1. 连续性方程</h3>
+                <div class="formula-box">
+                    <div class="formula">ρ₁u₁A₁ = ρ₂u₂A₂ = m_s (常数)</div>
+                    <p class="formula-desc">m_s 为质量流量 (kg/s)，u 为平均流速 (m/s)，A 为流通截面积 (m²)。</p>
+                </div>
+                <p>对于<span class="highlight">不可压缩流体（如水等液体）</span>，密度 ρ 视为常数，公式简化为：</p>
+                <div class="formula-box">
+                    <div class="formula">u₁A₁ = u₂A₂ = V_s (常数)</div>
+                    <p class="formula-desc">V_s 为体积流量 (m³/s)。对于圆形管道 ($A = \pi d^2 / 4$)，流速与管径的平方成反比：$u_1 d_1^2 = u_2 d_2^2$。</p>
+                </div>
+            </div>
+
+            <div id="sec3" class="section">
+                <h1>第三节：机械能衡算方程</h1>
+                <p>流体在流动过程中，涉及三种机械能：位能($gz$)、动能($u^2/2$)、静压能($p/\rho$)。</p>
+
+                <h3>1. 实际流体的机械能衡算（伯努利方程）</h3>
+                <p>由于实际流体有黏性，流动时要克服摩擦阻力，消耗机械能产生阻力损失 $\sum h_f$。</p>
+                <div class="formula-box">
+                    <div class="formula">z₁g + u₁²/2 + p₁/ρ + We = z₂g + u₂²/2 + p₂/ρ + ∑w_f</div>
+                    <p class="formula-desc">单位：J/kg。<br>
+                    We: 外加有效功（如泵向流体提供的能量）。若求泵的轴功率，则 $N = We \cdot m_s / \eta$（η为泵的效率）。<br>
+                    ∑w_f: 流体在管路中消耗的总机械能损失。</p>
+                </div>
+                <p>若将上式各项除以重力加速度 $g$，则各项单位变为“米(m)”液柱高度，这就是工程上常用的“压头”表达式：</p>
+                <div class="formula-box">
+                    <div class="formula">z₁ + u₁²/2g + p₁/ρg + H_e = z₂ + u₂²/2g + p₂/ρg + ∑h_f</div>
+                    <p class="formula-desc">H_e 为泵提供的有效压头；∑h_f 为管路总压头损失。</p>
+                </div>
+            </div>
+
+            <div id="sec4" class="section">
+                <h1>第四节：雷诺数与流动形态</h1>
+                <p>1883年，雷诺通过实验发现了流体的两种截然不同的流动形态：层流 (Laminar flow) 和 湍流 (Turbulent flow)。</p>
+
+                <h3>雷诺数 (Re)</h3>
+                <p>决定流动型态的唯一准则是无量纲数群——雷诺数。</p>
+                <div class="formula-box">
+                    <div class="formula">Re = d·u·ρ / μ</div>
+                    <p class="formula-desc">
+                        d: 管径 (m) | u: 流速 (m/s) | ρ: 密度 (kg/m³) | μ: 动力黏度 (Pa·s)
+                    </p>
+                </div>
+                <p><strong>判据：</strong><br>
+                1. 当 $Re \le 2000$ 时，流体必定为<span class="highlight">层流</span>。<br>
+                2. 当 $Re > 4000$ 时，流体一般为<span class="highlight">湍流</span>。<br>
+                3. 2000 < Re < 4000 时，为过渡区。</p>
+            </div>
+
+            <div id="sec5" class="section">
+                <h1>第五节：流体流动的阻力</h1>
+                <p>流体在管内流动时，由于黏性摩擦和边界层分离现象，必然会消耗机械能。阻力分为**沿程阻力**（直管阻力）和**局部阻力**。</p>
+                
+                
+                
+                <h3>1. 直管阻力 (范宁 Fanning 公式)</h3>
+                <p>流体流经一定管径的直管时产生的摩擦阻力，计算公式为：</p>
+                <div class="formula-box">
+                    <div class="formula">h_f = λ · (l / d) · (u² / 2)</div>
+                    <p class="formula-desc">
+                        单位为 J/kg。<br>
+                        λ (Lambda): 摩擦系数 (无量纲)。<br>
+                        l: 直管长度 (m)；d: 管内径 (m)。
+                    </p>
+                </div>
+
+                <h3>2. 摩擦系数 λ 的确定</h3>
+                <p>摩擦系数不是一个常数，它与流体的流动形态（雷诺数 Re）以及管壁粗糙度（ε/d）密切相关。</p>
+                <ul>
+                    <li><strong>层流区 (Re ≤ 2000)：</strong> λ 仅与雷诺数有关，与管壁粗糙度无关。计算公式极为简单：<span class="highlight">λ = 64 / Re</span></li>
+                    <li><strong>湍流区 (Re > 4000)：</strong> λ 受 Re 和相对粗糙度(ε/d)共同影响。通常需要查阅教材中的**莫迪(Moody)图**或使用经验公式。在完全湍流区（阻力平方区），λ 仅与相对粗糙度有关。</li>
+                </ul>
+            </div>
+
+            <div id="sec6" class="section">
+                <h1>第六节：局部阻力计算</h1>
+                <p>当流体流经阀门、弯头、三通、扩大或缩小的截面时，由于流速大小和方向的突然改变，引起流体质点相互碰撞并产生旋涡（边界层分离），从而消耗大量能量。</p>
+
+                <h3>1. 阻力系数法</h3>
+                <div class="formula-box">
+                    <div class="formula">h_f' = ζ · (u² / 2)</div>
+                    <p class="formula-desc">ζ (Zeta) 为局部阻力系数，通常由实验测定。注意：式中的 u 通常指管件后（或截面较小处）的流速。</p>
+                </div>
+
+                <h3>2. 当量长度法 (核心考点)</h3>
+                <p>这是你的笔记中特别强调的内容。它的巧妙之处在于：将局部阻力折算成一段具有**相同直径、长度为 $L_e$ 的直管**所产生的阻力。</p>
+                <div class="formula-box">
+                    <div class="formula">h_f' = λ · (L_e / d) · (u² / 2)</div>
+                    <p class="formula-desc">L_e 即为当量长度 (m)。查表可得不同阀门、管件的当量长度。</p>
+                </div>
+
+                <div class="alert-box">
+                    <strong>💡 管路总阻力计算公式统一：</strong><br>
+                    使用当量长度法后，直管阻力与局部阻力可以完美合并计算：<br>
+                    <span class="highlight">∑h_f = λ · [(l + ∑L_e) / d] · (u² / 2)</span>
+                </div>
+            </div>
+
+            <div id="sec7" class="section">
+                <h1>第七节：流量测量 (流量计)</h1>
+                <p>化工厂中必须实时监控流量，考研常考测速管、孔板和转子流量计的工作原理。底层逻辑无一例外，都是**伯努利方程**。</p>
+                
+                
+
+                <h3>1. 测速管 (皮托管)</h3>
+                <p>通过测量流体的<span class="highlight">动压头（冲压头与静压头之差）</span>来计算管内某一点的**局部流速**。流速公式：$u = c \sqrt{2 \Delta p / \rho}$。</p>
+
+                <h3>2. 孔板流量计与文丘里管</h3>
+                <p>人为在管路中加一个缩口（孔板或喉管）。流体经过缩口时，速度剧增，压力骤降。通过测量缩口前后的**压强差**，即可推算出流量。</p>
+                <div class="formula-box">
+                    <div class="formula">V_s = C_0 · A_0 · \sqrt{2 \Delta p / ρ}</div>
+                    <p class="formula-desc">C_0 为流量系数；A_0 为孔口面积。<br>
+                    孔板流量计结构简单，但局部阻力损失极大（能量浪费严重）；文丘里管呈流线型，阻力极小，但造价昂贵。</p>
+                </div>
+
+                <h3>3. 转子流量计</h3>
+                <p>与孔板流量计（截面恒定，压差变化）不同，转子流量计是<span class="highlight">恒压差、变截面</span>的流量计。流体自下而上流过锥形管，顶起转子。流量越大，转子升得越高，流通截面积越大。读数直接看转子所在高度。</p>
+            </div>
+
+            <div id="examples" class="section">
+                <h1>经典例题无删减全解析</h1>
+                <p>以下例题完全提取自教材，涵盖了考试最核心的大题计算步骤（包含阻力计算与流量计）。</p>
+
+                <div class="example-card">
+                    <div class="example-title">
+                        <span>【例 1-3】 机械能的相互转化 (动压头与静压头)</span>
+                        <span class="badge">概念理解</span>
+                    </div>
+                    <div class="example-problem">
+                        高位槽中液面高度保持为H，高位槽下接一管路。在截面处接有两个垂直玻璃管：一个是直的（测静压），一个带有弯头且正对来流（测动压头与静压头之和）。设流体阻力可以忽略，试分析各细管内的液柱高度关系。
+                    </div>
+                    <button class="accordion-btn">查看详细解析</button>
+                    <div class="accordion-content">
+                        <div class="step">
+                            <strong>1. 取截面与基准面：</strong> 取槽内液面为截面1，直管处为截面2。以截面2为基准面 ($z_2 = 0$)。
+                        </div>
+                        <div class="step">
+                            <strong>2. 列伯努利方程：</strong><br>
+                            $H + u_1^2/2g + p_1/\rho g = z_2 + u_2^2/2g + p_2/\rho g$<br>
+                            由于液面很大 $u_1 \approx 0$，与大气相通 $p_1 = 0$ (表压)，代入得：<br>
+                            $H = u_2^2/2g + p_2/\rho g$
+                        </div>
+                        <div class="step">
+                            <strong>3. 结论分析：</strong><br>
+                            直管测量的是静压头 $p_2/\rho g$。<br>
+                            弯头管测量的是冲压头，由于流体在弯头处速度降为零，动压头 $u_2^2/2g$ 全部转化为静压头。因此，带有弯头的管子内的液柱高度等于 $u_2^2/2g + p_2/\rho g$，即恰好等于高位槽的液面高度 $H$。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card">
+                    <div class="example-title">
+                        <span>【例 1-4】 虹吸管与喷嘴问题</span>
+                        <span class="badge">综合大题</span>
+                    </div>
+                    <div class="example-problem">
+                        桶中的水经等径虹吸管，再经过一喷嘴流出。喷嘴直径是虹吸管直径的 80%。设流动阻力可以不计，桶内液面与喷嘴出口的高度差为 0.7m。试求：<br>
+                        (1) 喷嘴处和管内水的流速；<br>
+                        (2) 管内最高点 (距液面 1.2m 处) 的静压头。
+                    </div>
+                    <button class="accordion-btn">查看详细解析</button>
+                    <div class="accordion-content">
+                        <div class="step">
+                            <strong>第一步：求喷嘴流速</strong><br>
+                            取桶内液面为截面1，喷嘴出口为截面2。以截面2为基准面。<br>
+                            $z_1 = 0.7m, z_2 = 0$。压力均为大气压，表压 $p_1 = p_2 = 0$。液面流速 $u_1 \approx 0$。<br>
+                            代入伯努利方程：$0.7g + 0 + 0 = 0 + u_2^2/2 + 0$<br>
+                            解得喷嘴流速：$u_2 = \sqrt{2 \times 9.81 \times 0.7} = 3.71$ m/s。
+                        </div>
+                        <div class="step">
+                            <strong>第二步：求管内流速 (用连续性方程)</strong><br>
+                            管内流速 $u_{管} \cdot d_{管}^2 = u_2 \cdot d_{喷嘴}^2$<br>
+                            因为 $d_{喷嘴} = 0.8 d_{管}$，所以：<br>
+                            $u_{管} = 3.71 \times (0.8)^2 = 2.37$ m/s。
+                        </div>
+                        <div class="step">
+                            <strong>第三步：求最高点静压头</strong><br>
+                            取液面为截面1，最高点为截面3。基准面仍在喷嘴处。<br>
+                            此时必须用绝对压力计算（取大气压头为 $10.33 mH_2O$）：<br>
+                            $h_1 = z_1 + u_1^2/2g + p_1/\rho g = 0.7 + 0 + 10.33 = 11.03 mH_2O$<br>
+                            在最高点3：$z_3 = 0.7 + 1.2 = 1.9m$。<br>
+                            代入：$11.03 = 1.9 + (2.37^2 / 2g) + p_3/\rho g$<br>
+                            解得：$p_3/\rho g = 11.03 - 1.9 - 0.29 = 8.84 mH_2O$ (绝压)。<br>
+                            此值小于大气压，表明最高点处于负压（真空）状态，极易发生汽化导致虹吸破坏。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card">
+                    <div class="example-title">
+                        <span>【例 1-5】 泵的外加功率计算</span>
+                        <span class="badge">考试必考</span>
+                    </div>
+                    <div class="example-problem">
+                        用泵将贮槽中的水打入洗涤塔并经喷头喷出。流量为 $85 m^3/h$，喷头前管路总阻力损失为 $10 J/kg$。喷头前压力较塔内压力高 $100 kPa$。水从塔底流入下水道阻力为 $12 J/kg$。塔底距下水道水面高 $1.2m$，喷头距贮槽水面高 $7m$。求泵供给水的外加功率。
+                    </div>
+                    <button class="accordion-btn">查看解题思路 (涉及两段衡算)</button>
+                    <div class="accordion-content">
+                        <div class="step">
+                            <strong>难点突破：</strong> 本题流体在塔内是间断喷洒的，不能直接从槽液面(1)列方程到废水池(4)。必须分两段列伯努利方程。
+                        </div>
+                        <div class="step">
+                            <strong>第一段：塔底(3) 到 废水池(4)</strong><br>
+                            求塔内压力 $p_3$。<br>
+                            $z_3 g + p_3/\rho = z_4 g + p_4/\rho + w_{f,3-4}$<br>
+                            代入数据（取4为基准面）：$1.2 \times 9.81 + p_3/\rho = 0 + 0 + 12$<br>
+                            解得：$p_3/\rho = 12 - 11.77 = 0.23 J/kg$。
+                        </div>
+                        <div class="step">
+                            <strong>第二段：贮槽(1) 到 喷头前(2)</strong><br>
+                            已知喷头前压力 $p_2$ 比 $p_3$ 高 $100 kPa$，所以 $p_2/\rho = 0.23 + 100000/1000 = 100.23 J/kg$。<br>
+                            计算管内流速 $u_2$：根据管径求得 $u_2 = 2.68 m/s$。<br>
+                            列方程：$z_1 g + We = z_2 g + u_2^2/2 + p_2/\rho + w_{f,1-2}$<br>
+                            $0 + We = 7 \times 9.81 + 2.68^2/2 + 100.23 + 10$<br>
+                            求得 $We = 182.5 J/kg$。
+                        </div>
+                        <div class="step">
+                            <strong>最终功率：</strong> $N = m_s \cdot We = (\rho \cdot V_s) \cdot We = (1000 \times 85 / 3600) \times 182.5 = 4310 W = 4.31 kW$。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card">
+                    <div class="example-title">
+                        <span>【例 1-10 变体】 综合管路总阻力与液面高度计算</span>
+                        <span class="badge">期末必考大题</span>
+                    </div>
+                    <div class="example-problem">
+                        将敞口高位槽 A 中的水（ρ=1000kg/m³, μ=1×10⁻³ Pa·s）自流送入反应器 B 中。反应器内表压为 20 kPa。输送管路为 φ57×3.5mm 的无缝钢管，直管长度 20m。管路上有全开的闸阀一个（L_e=0.4m），90°标准弯头两个（每个 L_e=1.5m）。水在管内的流速要求达到 2.0 m/s。管壁绝对粗糙度 ε=0.2mm。求高位槽液面应高出管路出口多少米？
+                    </div>
+                    <button class="accordion-btn">查看逐步解析</button>
+                    <div class="accordion-content">
+                        <div class="step">
+                            <strong>步骤 1：分析几何参数与物理量</strong><br>
+                            管内径 $d = 57 - 2 \times 3.5 = 50mm = 0.05m$。<br>
+                            总当量长度 $\sum L_e = 0.4 + 2 \times 1.5 = 3.4 m$。<br>
+                            当量总长度 $L_{total} = l + \sum L_e = 20 + 3.4 = 23.4 m$。
+                        </div>
+                        <div class="step">
+                            <strong>步骤 2：判断流型与求摩擦系数 λ</strong><br>
+                            计算雷诺数：$Re = \frac{du\rho}{\mu} = \frac{0.05 \times 2.0 \times 1000}{0.001} = 100,000 > 4000$<br>
+                            流体为湍流。相对粗糙度 $\epsilon/d = 0.2 / 50 = 0.004$。<br>
+                            查阅莫迪图，对应 $Re=10^5$ 和 $\epsilon/d=0.004$ 的 $\lambda \approx 0.029$。
+                        </div>
+                        <div class="step">
+                            <strong>步骤 3：计算系统总阻力损失</strong><br>
+                            $\sum h_f = \lambda \frac{l + \sum L_e}{d} \frac{u^2}{2} = 0.029 \times \frac{23.4}{0.05} \times \frac{2.0^2}{2} = 27.144 J/kg$
+                        </div>
+                        <div class="step">
+                            <strong>步骤 4：列伯努利方程求高度 Z</strong><br>
+                            取高位槽液面为截面1，管路出口为截面2。截面2为基准面。<br>
+                            $Z \cdot g + 0 + 0 = 0 + \frac{u_2^2}{2} + \frac{p_2}{\rho} + \sum h_f$<br>
+                            代入数据：$Z \times 9.81 = \frac{2.0^2}{2} + \frac{20000}{1000} + 27.144$<br>
+                            $Z \times 9.81 = 2 + 20 + 27.144 = 49.144$<br>
+                            解得：$Z = 5.01 m$。<br>
+                            <em>答：高位槽液面应高出出口至少 5.01 米。</em>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card">
+                    <div class="example-title">
+                        <span>【测速管应用】 皮托管测量管中心流速</span>
+                        <span class="badge">概念应用</span>
+                    </div>
+                    <div class="example-problem">
+                        用皮托管测量空气在圆管内的中心流速。皮托管与 U 形压差计连接，指示液为水。若 U 形压差计的读数 R = 20 mm，空气的密度为 1.2 kg/m³。求空气在管中心的流速。(水的密度为 1000 kg/m³)
+                    </div>
+                    <button class="accordion-btn">查看解析</button>
+                    <div class="accordion-content">
+                        <div class="step">
+                            <strong>核心思路：</strong>皮托管测得的压差，本质上等于流体的动压头。<br>
+                            $\Delta p = (\rho_{水} - \rho_{空气}) \cdot g \cdot R$
+                        </div>
+                        <div class="step">
+                            <strong>代入计算：</strong><br>
+                            由于空气密度远小于水，简化为 $\Delta p \approx \rho_{水} \cdot g \cdot R = 1000 \times 9.81 \times 0.02 = 196.2 Pa$。
+                        </div>
+                        <div class="step">
+                            <strong>求中心流速：</strong><br>
+                            根据公式：$u = \sqrt{\frac{2 \Delta p}{\rho_{空气}}}$ (皮托管系数 c 一般取 1)<br>
+                            $u = \sqrt{\frac{2 \times 196.2}{1.2}} = \sqrt{327} \approx 18.08 m/s$。
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏导航切换逻辑
+        function showTab(tabId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 手风琴折叠面板逻辑
+        var acc = document.getElementsByClassName("accordion-btn");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                } 
+            });
+        }
+    </script>
+</body>
+</html>
